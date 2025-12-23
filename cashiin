@@ -1,4 +1,4 @@
-local correctKey = "cashiin"
+local correctKey = "cash"
 
 local accessGranted = false
 local otherThingLoaded = false
