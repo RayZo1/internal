@@ -1339,7 +1339,7 @@ else
     
     local Games = {
         DaHood = {
-            ID = 2,
+            ID = 2788229376,
             Details = {
                 Name = "Da Hood",
                 Argument = "ClientBullet",
