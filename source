@@ -1344,7 +1344,7 @@ else
             ID = 2788229376,
             Details = {
                 Name = "Da Hood",
-                Argument = "ClientBullet",
+                Argument = "UpdateMousePosI2",
                 Remote = "MainEvent",
                 BodyEffects = "K.O"
             }
