@@ -1,3 +1,47 @@
+local HttpService = game:GetService("HttpService")
+local StarterGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
+local initialized = false
+local sessionid = ""
+Name = "a" --* Application Name
+Ownerid = "yEJi1g7NyN" --* OwnerID
+APPVersion = "1.0"     --* Application Version
+local req = game:HttpGet('https://keyauth.win/api/1.1/?name=' .. Name .. '&ownerid=' .. Ownerid .. '&type=init&ver=' .. APPVersion)
+if req == "KeyAuth_Invalid" then 
+   local player = Players.LocalPlayer
+   if player then
+       player:Kick("Error: Application not found.")
+   end
+   return false
+end
+local data = HttpService:JSONDecode(req)
+if data.success == true then
+   initialized = true
+   sessionid = data.sessionid
+elseif (data.message == "invalidver") then
+   local player = Players.LocalPlayer
+   if player then
+       player:Kick("Error: Wrong application version.")
+   end
+   return false
+else
+   local player = Players.LocalPlayer
+   if player then
+       player:Kick("Error: " .. data.message)
+   end
+   return false
+end
+local req = game:HttpGet('https://keyauth.win/api/1.1/?name=' .. Name .. '&ownerid=' .. Ownerid .. '&type=license&key=' .. shared.Global.License ..'&ver=' .. APPVersion .. '&sessionid=' .. sessionid)
+local data = HttpService:JSONDecode(req)
+if data.success == false then 
+    local player = Players.LocalPlayer
+    if player then
+        player:Kick("Error: " .. data.message)
+    end
+    return false
+end
+
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
