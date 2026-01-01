@@ -9,7 +9,6 @@ APPVersion = "1.0"     --* Application Version
 local req = game:HttpGet('https://keyauth.win/api/1.1/?name=' .. Name .. '&ownerid=' .. Ownerid .. '&type=init&ver=' .. APPVersion)
 if req == "KeyAuth_Invalid" then 
    local player = Players.LocalPlayer
-   if player then
        player:Kick("Error: Application not found.")
    end
    return false
@@ -26,7 +25,6 @@ elseif (data.message == "invalidver") then
    return false
 else
    local player = Players.LocalPlayer
-   if player then
        player:Kick("Error: " .. data.message)
    end
    return false
@@ -35,7 +33,6 @@ local req = game:HttpGet('https://keyauth.win/api/1.1/?name=' .. Name .. '&owner
 local data = HttpService:JSONDecode(req)
 if data.success == false then 
     local player = Players.LocalPlayer
-    if player then
         player:Kick("Error: " .. data.message)
     end
     return false
