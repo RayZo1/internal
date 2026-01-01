@@ -7,14 +7,14 @@ shared.UG = {
         AntiAimViewerStatus = false
     },
 
-    ['Conditions'] = {
+    ['Checks'] = {
         Knocked = true,
         Reloading = true,
         Visible = true,
         Protected = false,
     },
 
-    ['Silent Aimbot'] = {
+    ['Silent'] = {
         ['Enabled'] = true,
         ['HitPart'] = 'ClosestPoint',
         ['Prediction'] = { { X = 0, Y = 0, Z = 0 } },
@@ -31,7 +31,7 @@ shared.UG = {
         },
     },
 
-    ['Camera Aimbot'] = {
+    ['Camera'] = {
         ['Enabled'] = true,
         ['Part'] = 'ClosestPart',
 
@@ -48,7 +48,7 @@ shared.UG = {
         },
     },
 
-    ['Trigger Bot'] = {
+    ['Autoshoot'] = {
         ['Enabled'] = false,
         ['Keybind'] = { Key = 'V', Mode = 'Hold' },
 
@@ -61,7 +61,7 @@ shared.UG = {
         ['End'] = 0.08,
     },
 
-    ['Spread Modifications'] = {
+    ['Spread Mods'] = {
         ['Enabled'] = true,
         ['Method'] = 'randomized',
 
@@ -76,7 +76,7 @@ shared.UG = {
         },
     },
 
-    ['Hitbox Expander'] = {
+    ['Client Redirection'] = {
         ['Enabled'] = true,
         ['Config'] = {
             ['[Double-Barrel SG]'] = { H = 1, W = 1.25 },
@@ -85,14 +85,14 @@ shared.UG = {
         },
     },
 
-    ['Normal Macro'] = {
+    ['Macro'] = {
         ['Enabled'] = true,
         ['Keybind'] = { Key = 'X', Mode = 'Hold' },
         ['Delay'] = 0.015,
         ['Mode'] = 'FirstPerson'
     },
 
-    ['Noclip Macro'] = {
+    ['Wallglitch Macro'] = {
         ['Enabled'] = false,
         ['Keybind'] = { Key = 'B', Mode = 'Hold' },
         ['Delay'] = 0.03,
