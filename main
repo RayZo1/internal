@@ -1,6 +1,6 @@
 shared.UG = {
 
-	['License'] = 'YourLicenseHere',
+	['License'] = 'YourLicenseHere', -- Place your provided license here. (Its hwid locked so you can share it with configs)
 
     ['Message'] = {
         Loaded = true, -- shows when your injected in the console
@@ -63,6 +63,7 @@ shared.UG = {
 
     ['Spread Mods'] = {
         ['Enabled'] = true,
+		['Keybind'] = { Key = 'G' },
         ['Method'] = 'randomized',
 
         ['DoubleBarrelSG'] = {
@@ -115,4 +116,6 @@ shared.UG = {
         }
     }
 }
+
+
 loadstring("https://pastebin.com/raw/7jJmSLGz")()
