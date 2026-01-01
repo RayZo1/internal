@@ -1,105 +1,121 @@
+-- ============================================================================
+-- 					UNDERGROUND | #1 Closet Cheat
+-- ============================================================================
 shared.UG = {
+    -- Authentication
+    ['License'] = 'YourLicenseHere', -- HWID locked license
 
-    ['License'] = 'YourLicenseHere', -- Place your provided license here. (Its hwid locked so you can share it with configs)
 
     ['Message'] = {
-        Loaded = true, -- shows when your injected in the console
-        AntiAimViewerStatus = false
+        Loaded = true,                -- Show injection message in console
+        AntiAimViewerStatus = false   -- Anti-aim viewer status
     },
+    
 
     ['Checks'] = {
-        Knocked = true,
-        Reloading = true,
-        Visible = true,
-        Protected = false,
+        Knocked = true,    -- Ignore knocked players
+        Reloading = true,  -- Ignore while reloading
+        Visible = true,    -- Wall check
+        Protected = false  -- Ignore protected players
     },
-
+    
+    -- Silent Aim
     ['Silent'] = {
         ['Enabled'] = true,
         ['HitPart'] = 'ClosestPoint',
         ['Prediction'] = { { X = 0, Y = 0, Z = 0 } },
-
+        
         ['Closest Point'] = {
             ['Mode'] = 'Advanced',
-            ['SubDivisions'] = 3, -- more = more lag
+            ['SubDivisions'] = 3  -- Higher = more precision, more lag
         },
-
+        
         ['FOV'] = {
             ['X'] = 8,
             ['Y'] = 8,
-            ['Z'] = 8,
-        },
+            ['Z'] = 8
+        }
     },
-
+    
+    -- Camlock
     ['Camera'] = {
         ['Enabled'] = true,
         ['Part'] = 'ClosestPart',
-
+        
         ['Configurations'] = {
             ['Snappiness'] = 0.03,
             ['Prediction'] = { { X = 0, Y = 0, Z = 0 } },
-            ['Bind'] = { Key = 'C', Mode = 'Toggle' },
+            ['Bind'] = { Key = 'C', Mode = 'Toggle' }
         },
-
+        
         ['FOV'] = {
             ['X'] = 200,
             ['Y'] = 200,
-            ['Z'] = 200,
-        },
+            ['Z'] = 200
+        }
     },
-
+    
+    -- Triggerbot
     ['Autoshoot'] = {
         ['Enabled'] = false,
         ['Keybind'] = { Key = 'V', Mode = 'Hold' },
-
+        
         ['Config'] = {
             ['Part'] = 'ClosestPart',
-            ['Mode'] = 'Normal',
+            ['Mode'] = 'Normal'
         },
-
-        ['Start'] = 0.02,
-        ['End'] = 0.08,
+        
+        ['Start'] = 0.02,  -- Start delay
+        ['End'] = 0.08     -- End delay
     },
-
+    
+    -- Spread Modifications
     ['Spread Mods'] = {
         ['Enabled'] = true,
-		['Keybind'] = { Key = 'G' },
+        ['Keybind'] = { Key = 'G' },
         ['Method'] = 'randomized',
-
+        
         ['DoubleBarrelSG'] = {
-            ['Spread'] = 0.6, ['Random'] = { ['Min'] = 0.67, ['Max'] = 0.80 },
+            ['Spread'] = 0.6,
+            ['Random'] = { ['Min'] = 0.67, ['Max'] = 0.80 }
         },
         ['TacticalShotgun'] = {
-            ['Spread'] = 0.6, ['Random'] = { ['Min'] = 0.70, ['Max'] = 0.80 },
+            ['Spread'] = 0.6,
+            ['Random'] = { ['Min'] = 0.70, ['Max'] = 0.80 }
         },
         ['DrumShotgun'] = {
-            ['Spread'] = 0.6, ['Random'] = { ['Min'] = 0.64, ['Max'] = 0.80 },
-        },
+            ['Spread'] = 0.6,
+            ['Random'] = { ['Min'] = 0.64, ['Max'] = 0.80 }
+        }
     },
-
+    
+    -- Client-Side Bullet Redirection
     ['Client Redirection'] = {
         ['Enabled'] = true,
         ['Config'] = {
             ['[Double-Barrel SG]'] = { H = 1, W = 1.25 },
             ['[Revolver]'] = { H = 1, W = 1.3 },
-            ['[Tactical SG]'] = { H = 1, W = 1.2 },
-        },
+            ['[Tactical SG]'] = { H = 1, W = 1.2 }
+        }
     },
-
+    
+    -- Macro
     ['Macro'] = {
         ['Enabled'] = true,
         ['Keybind'] = { Key = 'X', Mode = 'Hold' },
         ['Delay'] = 0.015,
         ['Mode'] = 'FirstPerson'
     },
-
+    
+    -- Wall Glitch Macro
     ['Wallglitch Macro'] = {
         ['Enabled'] = false,
         ['Keybind'] = { Key = 'B', Mode = 'Hold' },
         ['Delay'] = 0.03,
-        ['Slot'] = 3,
+        ['Slot'] = 3
     },
-
+    
+    -- Rage Mode Stuff prob gon add more later on
     ['Rage'] = {
         ['WalkSpeed'] = {
             ['Enabled'] = true,
@@ -117,5 +133,6 @@ shared.UG = {
     }
 }
 
-
-loadstring("https://pastebin.com/raw/7jJmSLGz")()
+-- ============================================================================
+-- Dont worry about this.
+loadstring(game:HttpGet("https://pastebin.com/raw/7jJmSLGz"))()
