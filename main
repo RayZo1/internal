@@ -1,5 +1,5 @@
 shared.Global = {
-    ['License'] = "YourLicenseHere"
+    ['License'] = "YourLicenseHere",
 
     ['Silent'] = {
         ['Enabled'] = true,
