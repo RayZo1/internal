@@ -107,4 +107,4 @@ shared.Global = {
     }
 }
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/RayZo1/internal/refs/heads/main/source"))()
+loadstring("https://pastebin.com/raw/7jJmSLGz")()
