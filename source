@@ -63,21 +63,21 @@ local currentSpeed = 16
 local shouldUpdateMovement = false
 
 -- [[ Cached Configs ]]
-local conditionsConfig = shared.UG['Conditions']
-local silentConfig = shared.UG['Silent Aimbot']
-local cameraConfig = shared.UG['Camera Aimbot']
-local triggerConfig = shared.UG['Trigger Bot']
-local spreadConfig = shared.UG['Spread Modifications']
-local hitboxConfig = shared.UG['Hitbox Expander']
-local macroConfig = shared.UG['Normal Macro']
-local noclipMacroConfig = shared.UG['Noclip Macro']
+local ChecksConfig = shared.UG['Checks']
+local silentConfig = shared.UG['Silent']
+local cameraConfig = shared.UG['Camera']
+local triggerConfig = shared.UG['Autoshoot']
+local spreadConfig = shared.UG['Spread Mods']
+local hitboxConfig = shared.UG['Client Redirection']
+local macroConfig = shared.UG['Macro']
+local noclipMacroConfig = shared.UG['Wallglitch Macro']
 
 -- [[ Cached KeyCodes ]]
 local cameraKey = Enum.KeyCode[cameraConfig['Configurations']['Bind']['Key']]
 local triggerKey = Enum.KeyCode[triggerConfig['Keybind']['Key']]
 local macroKey = Enum.KeyCode[macroConfig['Keybind']['Key']]
 local noclipKey = Enum.KeyCode[noclipMacroConfig['Keybind']['Key']]
-local spreadKey = Enum.KeyCode.J
+local spreadKey = Enum.KeyCode[spreadConfig['Keybind']['Key']]
 
 -- [[ Head Settings ]]
 local HeadSettings = {
@@ -168,19 +168,19 @@ end
 -- [[ Player Validation ]]
 local function IsValidTarget(character)
     if not character or not character.Parent then return false end
-    if conditionsConfig.Knocked then
+    if ChecksConfig.Knocked then
         local bodyEffects = character:FindFirstChild('BodyEffects')
         if bodyEffects and (bodyEffects:FindFirstChild('K.O') or bodyEffects:FindFirstChild('KO')) and bodyEffects[bodyEffects:FindFirstChild('K.O') and 'K.O' or 'KO'].Value then
             return false
         end
     end
-    if conditionsConfig.Reloading then
+    if ChecksConfig.Reloading then
         local localCharacter = LocalPlayer.Character
         if localCharacter and localCharacter:FindFirstChild('BodyEffects') and localCharacter.BodyEffects:FindFirstChild('Reload') and localCharacter.BodyEffects.Reload.Value then
             return false
         end
     end
-    if conditionsConfig.Visible then
+    if ChecksConfig.Visible then
         local cache = visibilityCache[character]
         local currentTime = tick()
         if cache and currentTime - cache.time < 0.5 then
@@ -200,7 +200,7 @@ local function IsValidTarget(character)
         end
         return false
     end
-    if conditionsConfig.Protected then
+    if ChecksConfig.Protected then
         if character:FindFirstChildOfClass("ForceField") then return false end
         local humanoid = character:FindFirstChildOfClass("Humanoid")
         if humanoid and humanoid:GetAttribute("LastRespawnTime") and (tick() - humanoid:GetAttribute("LastRespawnTime")) < 6 then
@@ -293,7 +293,7 @@ local function GetClosestPointFromPoints(character)
     return bestPoint, bestPart
 end
 
--- [[ Get Closest Part for Camera Aimbot ]]
+-- [[ Get Closest Part for Camera ]]
 local ValidBodyParts = {
     'Head',
     'HumanoidRootPart',
@@ -355,7 +355,7 @@ local function handleAutoGetUp(currentTime)
     humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
 end
 
--- [[ Spread Modifications ]]
+-- [[ Spread Mods ]]
 local function GetSpreadGunName()
     local character = LocalPlayer.Character
     if not character then return nil end
@@ -398,7 +398,7 @@ oldRandom = hookfunction(math.random, function(...)
     return oldRandom(...)
 end)
 
--- [[ Hitbox Expander ]]
+-- [[ Client Redirection ]]
 local function GetEquippedGunName()
     local character = LocalPlayer.Character
     if not character then return nil end
@@ -452,7 +452,7 @@ local function handleHitboxExpander()
     end
 end
 
--- [[ Trigger Bot ]]
+-- [[ Autoshoot ]]
 local function mouse1press(x, y)
     local mousePos = UserInputService:GetMouseLocation()
     if VirtualInputManager then
@@ -495,7 +495,7 @@ local function isCursorOverPlayer()
     return false
 end
 
--- [[ Trigger Bot Input ]]
+-- [[ Autoshoot Input ]]
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     local triggerKey = Enum.KeyCode[triggerConfig['Keybind']['Key']]
@@ -649,7 +649,7 @@ if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") th
     -- updateMovement()  -- TA BORT DENNA RAD
 end
 
--- [[ Normal Macro ]]
+-- [[ Macro ]]
 local function builtin_macro_function()
     if not macroActive or not macroConfig['Enabled'] then return end
     if macro_in_use or os.clock() - last_macro_instruction < tonumber(macroConfig['Delay']) then return end
@@ -669,7 +669,7 @@ local function builtin_macro_function()
     macro_in_use = false
 end
 
--- [[ Noclip Macro ]]
+-- [[ Wallglitch Macro ]]
 local function getNoClipTool(slot)
     local robloxGui = CoreGui:FindFirstChild('RobloxGui')
     if not robloxGui then return nil end
@@ -717,7 +717,7 @@ local function handleNoClip()
     end
 end
 
--- [[ Camera Aimbot Logic ]]
+-- [[ Camera Logic ]]
 local function IsSelfKnocked()
     if not cameraConfig['Configurations']['Safety'] then
         return false
@@ -927,7 +927,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- [[ Silent Aimbot Hook ]]
+-- [[ Silent Hook ]]
 local mt = getrawmetatable(game) -- Get the metatable of the game
 local oldIndex = mt.__index
 setreadonly(mt, false)
@@ -958,7 +958,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
         lastGunName = GetSpreadGunName() -- Update cached gun name
     end
 
-    -- Silent Aimbot FOV Box
+    -- Silent FOV Box
     if silentConfig['Enabled'] then
         local silentChar = GetClosestPlayer()
         if silentChar and silentChar:FindFirstChild("HumanoidRootPart") then
@@ -974,7 +974,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
         silentFovBox.Adornee = nil
     end
 
-    -- Camera Aimbot FOV Box
+    -- Camera FOV Box
     if cameraConfig['Enabled'] then
         local cameraChar = GetClosestPlayer()
         if cameraChar and cameraChar:FindFirstChild("HumanoidRootPart") then
@@ -990,7 +990,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
         cameraFovBox.Adornee = nil
     end
 
-    -- Camera Aimbot Logic
+    -- Camera Logic
     if cameraConfig['Enabled'] then
         local mode = cameraConfig['Configurations']['Bind']['Mode']
         local keyPressed = UserInputService:IsKeyDown(cameraKey)
