@@ -1,112 +1,118 @@
-shared.Global = {
-    ['License'] = "YourLicenseHere",
+shared.UG = {
 
-    ['Silent'] = {
-        ['Enabled'] = true,
-        ['Safety'] = true,
-        ['Mode'] = 'Target',
-        ['Auto'] = true,
-        ['Prediction'] = {['X'] = 0.087, ['Y'] = 0.087, ['Z'] = 0.087}
+	['License'] = 'YourLicenseHere',
+
+    ['Message'] = {
+        Loaded = true, -- shows when your injected in the console
+        AntiAimViewerStatus = false
     },
-    ['Camera'] = {
+
+    ['Conditions'] = {
+        Knocked = true,
+        Reloading = true,
+        Visible = true,
+        Protected = false,
+    },
+
+    ['Silent Aimbot'] = {
         ['Enabled'] = true,
-        ['Distance'] = 450,
-        ['MouseButton2'] = true,
-        ['FOV'] = 240,
+        ['HitPart'] = 'ClosestPoint',
+        ['Prediction'] = { { X = 0, Y = 0, Z = 0 } },
+
+        ['Closest Point'] = {
+            ['Mode'] = 'Advanced',
+            ['SubDivisions'] = 3, -- more = more lag
+        },
+
+        ['FOV'] = {
+            ['X'] = 8,
+            ['Y'] = 8,
+            ['Z'] = 8,
+        },
+    },
+
+    ['Camera Aimbot'] = {
+        ['Enabled'] = true,
+        ['Part'] = 'ClosestPart',
+
         ['Configurations'] = {
-            ['Value'] = 0.0121,
-            ['ThirdPerson'] = false,
-            ['FirstPerson'] = true
+            ['Snappiness'] = 0.03,
+            ['Prediction'] = { { X = 0, Y = 0, Z = 0 } },
+            ['Bind'] = { Key = 'C', Mode = 'Toggle' },
         },
-        ['Prediction'] = {['X'] = 0.1225, ['Y'] = 0.1225, ['Z'] = 0.1225}
-    },
-    ['Control'] = {
-        ['BlockLowHits'] = true,
-        ['Align'] = true,
-        ['VerticalSensitivity'] = 'tight',
-        ['DistanceModule'] = {['HorizontalDelta'] = '300', ['VerticalDelta'] = '300'}
-    },
-    ['FOV'] = {
-        ['Revolver'] = {6, 6.2, 6.1},
-        ['DoubleBarrelSG'] = {5.7, 5.2, 4.1},
-        ['Rifle'] = {4, 3.2, 2.1},
-        ['TacticalShotgun'] = {6, 5.2, 4.1},
-        ['AUG'] = {4, 3.2, 2.1}
-    },
-    ['Hits'] = {['power'] = '0.86'},
-    ['Hitbox'] = {
-        ['Enabled'] = true,
-        ['Guns'] = {
-            ['[Double-Barrel SG]'] = {H = 1.5, W = 1.5},
-            ['[Revolver]'] = {H = 1.2, W = 1.2},
-            ['[Tactical SG]'] = {H = 1.1, W = 1.1},
-            ['[Rifle]'] = {H = 1.0, W = 1.0}
+
+        ['FOV'] = {
+            ['X'] = 200,
+            ['Y'] = 200,
+            ['Z'] = 200,
         },
-        ['MouseButton2'] = true
     },
-    ['Trigger'] = {
-        ['Enabled'] = true,
-        ['Config'] = {['Safety'] = true, ['Auto'] = true, ['Mode'] = 'ClosestPart'},
-        ['Start'] = 0.001,
-        ['End'] = 0.002,
-        ['Mode'] = "Toggle"
-    },
-    ['Chances'] = {
-        ['Active'] = true,
-        ['Stats'] = {
-            ['Rev'] = '85',
-            ['DB'] = '95',
-            ['Shot'] = '100',
-            ['TacShot'] = '80',
-            ['SMG'] = '83',
-            ['Sil'] = '83',
-            ['AR'] = '83',
-            ['Other'] = '80'
-        }
-    },
-    ['Spread modifications'] = {
-        ['Mode'] = "Randomizer",
-        ['Spread Modifier'] = {Multiplier = 0.1},
-        ['Spread Randomizer'] = {Start = 0.2, End = 0.4},
-        ['Enabled'] = true,
-        ['Toggle Key'] = "G"
-    },
-    ['Inventory'] = {
+
+    ['Trigger Bot'] = {
         ['Enabled'] = false,
-        ['Keybind'] = 'E',
-        ['Order'] = {
-            ['[Revolver]'] = 2,
-            ['[Double-Barrel SG]'] = 1,
-            ['[TacticalShotgun]'] = 3,
-            ['[knife]'] = 4
-        }
+        ['Keybind'] = { Key = 'V', Mode = 'Hold' },
+
+        ['Config'] = {
+            ['Part'] = 'ClosestPart',
+            ['Mode'] = 'Normal',
+        },
+
+        ['Start'] = 0.02,
+        ['End'] = 0.08,
     },
-    ['Core'] = {['Enabled'] = true, ['Checks'] = {['Whitelist'] = {}}},
-    ['Macro'] = {
-        ['Settings'] = {['Enabled'] = false, ['Mode'] = 'toggle'},
-        ['Configurations'] = {['Enabled'] = false, ['Duration'] = 5, ['Frequency'] = 0.1}
+
+    ['Spread Modifications'] = {
+        ['Enabled'] = true,
+        ['Method'] = 'randomized',
+
+        ['DoubleBarrelSG'] = {
+            ['Spread'] = 0.6, ['Random'] = { ['Min'] = 0.67, ['Max'] = 0.80 },
+        },
+        ['TacticalShotgun'] = {
+            ['Spread'] = 0.6, ['Random'] = { ['Min'] = 0.70, ['Max'] = 0.80 },
+        },
+        ['DrumShotgun'] = {
+            ['Spread'] = 0.6, ['Random'] = { ['Min'] = 0.64, ['Max'] = 0.80 },
+        },
     },
-    ['Keys'] = {
-        ['Target'] = "C",
-        ['Cancel'] = "Z",
-        ['Trigger'] = 'X',
-        ['Macro'] = 'X',
-        ['WalkSpeed'] = 'V',
-        ['JumpPower'] = 'B'
+
+    ['Hitbox Expander'] = {
+        ['Enabled'] = true,
+        ['Config'] = {
+            ['[Double-Barrel SG]'] = { H = 1, W = 1.25 },
+            ['[Revolver]'] = { H = 1, W = 1.3 },
+            ['[Tactical SG]'] = { H = 1, W = 1.2 },
+        },
     },
-    ['Misc'] = {
+
+    ['Normal Macro'] = {
+        ['Enabled'] = true,
+        ['Keybind'] = { Key = 'X', Mode = 'Hold' },
+        ['Delay'] = 0.015,
+        ['Mode'] = 'FirstPerson'
+    },
+
+    ['Noclip Macro'] = {
+        ['Enabled'] = false,
+        ['Keybind'] = { Key = 'B', Mode = 'Hold' },
+        ['Delay'] = 0.03,
+        ['Slot'] = 3,
+    },
+
+    ['Rage'] = {
         ['WalkSpeed'] = {
             ['Enabled'] = true,
+            ['Toggle'] = 'V',
             ['Speed'] = 225,
             ['OnlyWithShift'] = true,
             ['Smoothness'] = 0.05
         },
         ['JumpPower'] = {
             ['Enabled'] = true,
+            ['Toggle'] = 'B',
             ['Power'] = 100,
             ['OnlyWithShift'] = true
         }
     }
 }
-
 loadstring("https://pastebin.com/raw/7jJmSLGz")()
