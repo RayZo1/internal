@@ -1,6 +1,6 @@
 shared.UG = {
 
-	['License'] = 'YourLicenseHere', -- Place your provided license here. (Its hwid locked so you can share it with configs)
+    ['License'] = 'YourLicenseHere', -- Place your provided license here. (Its hwid locked so you can share it with configs)
 
     ['Message'] = {
         Loaded = true, -- shows when your injected in the console
