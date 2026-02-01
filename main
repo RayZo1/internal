@@ -1,6 +1,3 @@
--- ============================================================================
--- 					UNDERGROUND | #1 Closet Cheat
--- ============================================================================
 shared.UG = {
     -- Authentication
     ['License'] = 'YourLicenseHere', -- HWID locked license
