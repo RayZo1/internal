@@ -600,11 +600,11 @@ UserInputService.InputBegan:Connect(function(input, processed)
         end
     end
     
-    if not processed and input.KeyCode == Enum.KeyCode[shared.UG.Rage.jumppower.Toggle:upper()] then
+    --[[if not processed and input.KeyCode == Enum.KeyCode[shared.UG.Rage.jumppower.Toggle:upper()] then
         JumppowerToggle = not JumppowerToggle
         shouldUpdateMovement = WalkspeedToggle or JumppowerToggle  -- Uppdatera om någon är på
         updateMovement()
-    end
+    end]]
 end)
 
 UserInputService.InputEnded:Connect(function(input, processed)
