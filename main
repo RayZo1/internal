@@ -1,133 +1,182 @@
-shared.UG = {
-    -- Authentication
+shared.config = {
     ['License'] = 'YourLicenseHere', -- HWID locked license
 
+    ['Console'] = true, -- Prints status in F9 Console
+    ['Toggle'] = 'C',
 
-    ['Message'] = {
-        Loaded = true,                -- Show injection message in console
-        AntiAimViewerStatus = false   -- Anti-aim viewer status
-    },
-    
+    ['Conditions'] = {
+        ['Whilst a player is selected'] = {
+            ['Knock Check'] = true,
+            ['Self Knocked'] = true,
+            ['Visible'] = true,
+            ['Crew Check'] = true,
+        },
 
-    ['Checks'] = {
-        Knocked = true,    -- Ignore knocked players
-        Reloading = true,  -- Ignore while reloading
-        Visible = true,    -- Wall check
-        Protected = false  -- Ignore protected players
+        ['Whilst selecting a player'] = {
+            ['Knock Check'] = true,
+            ['Self Knocked'] = true,
+            ['Visible'] = true,
+            ['Crew Check'] = true,
+        },
     },
-    
-    -- Silent Aim
-    ['Silent'] = {
+
+    ['Silent Aim'] = {
         ['Enabled'] = true,
-        ['HitPart'] = 'ClosestPoint',
-        ['Prediction'] = { { X = 0, Y = 0, Z = 0 } },
-        
+        ['Mode'] = 'Auto', -- Auto (Closest Player), Toggle (Silent Lock)
+        ['Hit Part'] = 'Closest Point',
+
         ['Closest Point'] = {
-            ['Mode'] = 'Advanced',
-            ['SubDivisions'] = 3  -- Higher = more precision, more lag
+            ['Type'] = 'Advanced', -- Normal (Scale Parts Individually), Advanced (Scale Whole Rig)
+            ['Scale'] = 0.18
         },
-        
+
+        ['Prediction'] = {
+            ['X'] = 0,
+            ['Y'] = 0,
+            ['Z'] = 0
+        },
+
         ['FOV'] = {
-            ['X'] = 8,
-            ['Y'] = 8,
-            ['Z'] = 8
+            ['Enabled'] = true, -- Recommended
+
+            ['Size'] = {
+                ['X'] = 5,
+                ['Y'] = 6.5,
+                ['Z'] = 3
+            },
+
+            ['Weapon Configuration'] = {
+                ['Enabled'] = false,
+
+                ['Shotguns'] = {
+                    ['X'] = 4.2,
+                    ['Y'] = 4.4,
+                    ['Z'] = 2
+                },
+
+                ['Pistols'] = {
+                    ['X'] = 2.6,
+                    ['Y'] = 4.4,
+                    ['Z'] = 1.9
+                },
+
+                ['Others'] = {
+                    ['X'] = 3,
+                    ['Y'] = 4,
+                    ['Z'] = 2
+                }
+            }
         }
     },
-    
-    -- Camlock
-    ['Camera'] = {
+
+    ['Camera Aimbot'] = {
         ['Enabled'] = true,
-        ['Part'] = 'ClosestPart',
-        
-        ['Configurations'] = {
-            ['Snappiness'] = 0.03,
-            ['Prediction'] = { { X = 0, Y = 0, Z = 0 } },
-            ['Bind'] = { Key = 'C', Mode = 'Toggle' }
+        ['Hit Part'] = 'Closest Part',
+        ['Snappiness'] = 0.05,
+
+        ['Prediction'] = {
+            ['X'] = 0,
+            ['Y'] = 0,
+            ['Z'] = 0
         },
-        
+
+        ['Camera Aimbot Checks'] = {
+            ['First Person'] = true,
+            ['Third Person'] = true,
+            ['Right Click'] = false,
+        },
+
         ['FOV'] = {
-            ['X'] = 200,
-            ['Y'] = 200,
-            ['Z'] = 200
-        }
-    },
-    
-    -- Triggerbot
-    ['Autoshoot'] = {
-        ['Enabled'] = false,
-        ['Keybind'] = { Key = 'V', Mode = 'Hold' },
-        
-        ['Config'] = {
-            ['Part'] = 'ClosestPart',
-            ['Mode'] = 'Normal'
-        },
-        
-        ['Start'] = 0.02,  -- Start delay
-        ['End'] = 0.08     -- End delay
-    },
-    
-    -- Spread Modifications
-    ['Spread Mods'] = {
-        ['Enabled'] = true,
-        ['Keybind'] = { Key = 'G' },
-        ['Method'] = 'randomized',
-        
-        ['DoubleBarrelSG'] = {
-            ['Spread'] = 0.6,
-            ['Random'] = { ['Min'] = 0.67, ['Max'] = 0.80 }
-        },
-        ['TacticalShotgun'] = {
-            ['Spread'] = 0.6,
-            ['Random'] = { ['Min'] = 0.70, ['Max'] = 0.80 }
-        },
-        ['DrumShotgun'] = {
-            ['Spread'] = 0.6,
-            ['Random'] = { ['Min'] = 0.64, ['Max'] = 0.80 }
-        }
-    },
-    
-    -- Client-Side Bullet Redirection
-    ['Client Redirection'] = {
-        ['Enabled'] = true,
-        ['Config'] = {
-            ['[Double-Barrel SG]'] = { H = 1, W = 1.25 },
-            ['[Revolver]'] = { H = 1, W = 1.3 },
-            ['[Tactical SG]'] = { H = 1, W = 1.2 }
-        }
-    },
-    
-    -- Macro
-    ['Macro'] = {
-        ['Enabled'] = true,
-        ['Keybind'] = { Key = 'X', Mode = 'Hold' },
-        ['Delay'] = 0.015,
-        ['Mode'] = 'FirstPerson'
-    },
-    
-    -- Wall Glitch Macro
-    ['Wallglitch Macro'] = {
-        ['Enabled'] = false,
-        ['Keybind'] = { Key = 'B', Mode = 'Hold' },
-        ['Delay'] = 0.03,
-        ['Slot'] = 3
-    },
-    
-    -- Rage Mode Stuff prob gon add more later on
-    ['Rage'] = {
-        ['WalkSpeed'] = {
             ['Enabled'] = true,
-            ['Toggle'] = 'V',
-            ['Speed'] = 225,
-            ['OnlyWithShift'] = true,
-            ['Smoothness'] = 0.05
-        },
-        ['JumpPower'] = {
-            ['Enabled'] = true,
-            ['Toggle'] = 'B',
-            ['Power'] = 100,
-            ['OnlyWithShift'] = true
+
+            ['Size'] = {
+                ['X'] = 10,
+                ['Y'] = 10,
+                ['Z'] = 10
+            },
+
+            ['Weapon Configuration'] = {
+                ['Enabled'] = false,
+
+                ['Shotguns'] = {
+                    ['X'] = 15,
+                    ['Y'] = 9,
+                    ['Z'] = 15
+                },
+
+                ['Pistols'] = {
+                    ['X'] = 15,
+                    ['Y'] = 8,
+                    ['Z'] = 15
+                },
+
+                ['Others'] = {
+                    ['X'] = 15,
+                    ['Y'] = 8,
+                    ['Z'] = 15
+                }
+            }
         }
-    }
+    },
+
+    ['Trigger Bot'] = {
+        ['Enabled'] = false,
+        ['Click Cooldown'] = 0,
+
+        ['Prediction'] = {
+            ['X'] = 0,
+            ['Y'] = 0,
+            ['Z'] = 0
+        },
+
+        ['Activation'] = {
+            ['Activation Mode'] = 'Hold',
+            ['Activation Bind'] = 'V'
+        },
+
+        ['FOV'] = {
+            ['X'] = 3,
+            ['Y'] = 4.3,
+            ['Z'] = 1.7
+        }
+    },
+
+    ['Weapon Modifications'] = {
+        ['Enabled'] = false,
+
+        ['[Double-Barrel SG]'] = {
+            ['Multiplier'] = 0.88
+        },
+
+        ['[TacticalShotgun]'] = {
+            ['Multiplier'] = 0.88
+        },
+
+        ['[Shotgun]'] = {
+            ['Multiplier'] = 0.88
+        },
+
+        ['[DrumShotgun]'] = {
+            ['Multiplier'] = 0.77
+        },
+    },
+
+    ['Speed Modifiers'] = {
+        ['Enabled'] = false,
+        ['Multiplier Mode'] = 'Multiply',
+
+		['Normal'] = {
+			['Multiplier'] = 1.09,
+		},
+
+		['Shooting'] = {
+			['Multiplier'] = 1.09,
+		},
+
+		['Reloading'] = {
+			['Multiplier'] = 1.09,
+		},
+    },
 }
 
 -- ============================================================================
