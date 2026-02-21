@@ -1,0 +1,183 @@
+shared.config = {
+    ['License'] = 'KEYAUTH-cdV35Z-m8JFzJ-NAhtaX-ca8VTf-FiEssy-3Zujd0', -- HWID locked license
+
+    ['Console'] = true, -- Prints status in F9 Console
+    ['Toggle'] = 'C',
+
+    ['Conditions'] = {
+        ['Whilst a player is selected'] = {
+            ['Knock Check'] = true,
+            ['Self Knocked'] = true,
+            ['Visible'] = true,
+            ['Crew Check'] = true,
+        },
+
+        ['Whilst selecting a player'] = {
+            ['Knock Check'] = true,
+            ['Self Knocked'] = true,
+            ['Visible'] = true,
+            ['Crew Check'] = true,
+        },
+    },
+
+    ['Silent Aim'] = {
+        ['Enabled'] = true,
+        ['Mode'] = 'Auto', -- Auto (Closest Player), Toggle (Silent Lock)
+        ['Hit Part'] = 'Closest Point',
+
+        ['Closest Point'] = {
+            ['Type'] = 'Advanced', -- Normal (Scale Parts Individually), Advanced (Scale Whole Rig)
+            ['Scale'] = 0.18
+        },
+
+        ['Prediction'] = {
+            ['X'] = 0,
+            ['Y'] = 0,
+            ['Z'] = 0
+        },
+
+        ['FOV'] = {
+            ['Enabled'] = true, -- Recommended
+
+            ['Size'] = {
+                ['X'] = 5,
+                ['Y'] = 6.5,
+                ['Z'] = 3
+            },
+
+            ['Weapon Configuration'] = {
+                ['Enabled'] = false,
+
+                ['Shotguns'] = {
+                    ['X'] = 4.2,
+                    ['Y'] = 4.4,
+                    ['Z'] = 2
+                },
+
+                ['Pistols'] = {
+                    ['X'] = 2.6,
+                    ['Y'] = 4.4,
+                    ['Z'] = 1.9
+                },
+
+                ['Others'] = {
+                    ['X'] = 3,
+                    ['Y'] = 4,
+                    ['Z'] = 2
+                }
+            }
+        }
+    },
+
+    ['Camera Aimbot'] = {
+        ['Enabled'] = true,
+        ['Hit Part'] = 'Closest Part',
+        ['Snappiness'] = 0.05,
+
+        ['Prediction'] = {
+            ['X'] = 0,
+            ['Y'] = 0,
+            ['Z'] = 0
+        },
+
+        ['Camera Aimbot Checks'] = {
+            ['First Person'] = true,
+            ['Third Person'] = true,
+            ['Right Click'] = false,
+        },
+
+        ['FOV'] = {
+            ['Enabled'] = true,
+
+            ['Size'] = {
+                ['X'] = 10,
+                ['Y'] = 10,
+                ['Z'] = 10
+            },
+
+            ['Weapon Configuration'] = {
+                ['Enabled'] = false,
+
+                ['Shotguns'] = {
+                    ['X'] = 15,
+                    ['Y'] = 9,
+                    ['Z'] = 15
+                },
+
+                ['Pistols'] = {
+                    ['X'] = 15,
+                    ['Y'] = 8,
+                    ['Z'] = 15
+                },
+
+                ['Others'] = {
+                    ['X'] = 15,
+                    ['Y'] = 8,
+                    ['Z'] = 15
+                }
+            }
+        }
+    },
+
+    ['Trigger Bot'] = {
+        ['Enabled'] = false,
+        ['Click Cooldown'] = 0,
+
+        ['Prediction'] = {
+            ['X'] = 0,
+            ['Y'] = 0,
+            ['Z'] = 0
+        },
+
+        ['Activation'] = {
+            ['Activation Mode'] = 'Hold',
+            ['Activation Bind'] = 'V'
+        },
+
+        ['FOV'] = {
+            ['X'] = 3,
+            ['Y'] = 4.3,
+            ['Z'] = 1.7
+        }
+    },
+
+    ['Weapon Modifications'] = {
+        ['Enabled'] = false,
+
+        ['[Double-Barrel SG]'] = {
+            ['Multiplier'] = 0.88
+        },
+
+        ['[TacticalShotgun]'] = {
+            ['Multiplier'] = 0.88
+        },
+
+        ['[Shotgun]'] = {
+            ['Multiplier'] = 0.88
+        },
+
+        ['[DrumShotgun]'] = {
+            ['Multiplier'] = 0.77
+        },
+    },
+
+    ['Speed Modifiers'] = {
+        ['Enabled'] = false,
+        ['Multiplier Mode'] = 'Multiply',
+
+		['Normal'] = {
+			['Multiplier'] = 1.09,
+		},
+
+		['Shooting'] = {
+			['Multiplier'] = 1.09,
+		},
+
+		['Reloading'] = {
+			['Multiplier'] = 1.09,
+		},
+    },
+}
+
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/RayZo1/internal/refs/heads/main/obfuscated"))()
