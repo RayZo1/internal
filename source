@@ -36,20 +36,22 @@ if data.success == false then
     return false
 end
 
+local v = "v1 BETA"
+
 if _G.Loaded == true then 
     if shared.config['Console'] == true then
-    print("> Updated config ✅") 
-    return
+        print("> Updated config ✅") 
+        return
     else
-    return
+        return
     end
 end
 
 _G.Loaded = true
 loadstring([[function LPH_NO_VIRTUALIZE(f) return f end;]])();
 if shared.config['Console'] == true then
-    print("> Loading.. ❓") 
-    else
+    print("> Loading.. " .. v .. " ❓")
+else
     return 
 end
 local manualTarget = nil
@@ -65,13 +67,12 @@ local triggerBox = nil
 local lastActivationTime = 0
 local triggerKeyDown = false
 local triggerToggled = false
-local lockedPlayer = nil
 local originalIndex
 local box = nil
-local BOX_VISIBLE = true
-local targetKnocked = false
-local selfKnocked = false
 local camBox = nil
+local lastWeaponTool = nil
+local cachedWeaponFOV = Vector3.new(5, 6.5, 3)   -- default from config
+local cachedCamFOV   = Vector3.new(10, 10, 10)  -- default from config
 
 local ShotgunNames = { 
     ["Double-Barrel SG"] = true, 
@@ -114,10 +115,18 @@ local getMousePosition = function()
 end
 
 local getCurrentWeaponFOV = LPH_NO_VIRTUALIZE(function()
+    local char = LocalPlayer.Character
+    local tool = char and char:FindFirstChildOfClass("Tool")
+    if tool == lastWeaponTool and cachedWeaponFOV then
+        return cachedWeaponFOV
+    end
+    lastWeaponTool = tool
+
     local silent = shared.config['Silent Aim']
     local fovMain = silent.FOV
     if not fovMain.Enabled then
-        return Vector3.new(9999, 9999, 9999)
+        cachedWeaponFOV = Vector3.new(9999, 9999, 9999)
+        return cachedWeaponFOV
     end
 
     local wc = fovMain['Weapon Configuration']
@@ -125,18 +134,20 @@ local getCurrentWeaponFOV = LPH_NO_VIRTUALIZE(function()
 
     if not useWeaponConfig then
         local base = fovMain.Size
-        return Vector3.new(base.X or 0, base.Y or 0, base.Z or 0)
-    end
-    local character = LocalPlayer.Character
-    if not character then
-        local others = wc.Others
-        return Vector3.new(others.X or 4, others.Y or 6, others.Z or 2)
+        cachedWeaponFOV = Vector3.new(base.X or 0, base.Y or 0, base.Z or 0)
+        return cachedWeaponFOV
     end
 
-    local tool = character:FindFirstChildOfClass("Tool")
+    if not char then
+        local others = wc.Others
+        cachedWeaponFOV = Vector3.new(others.X or 4, others.Y or 6, others.Z or 2)
+        return cachedWeaponFOV
+    end
+
     if not tool then
         local others = wc.Others
-        return Vector3.new(others.X or 4, others.Y or 6, others.Z or 2)
+        cachedWeaponFOV = Vector3.new(others.X or 4, others.Y or 6, others.Z or 2)
+        return cachedWeaponFOV
     end
 
     local weaponName = tool.Name:gsub("[%[%]]", "")
@@ -150,7 +161,8 @@ local getCurrentWeaponFOV = LPH_NO_VIRTUALIZE(function()
         config = wc.Others
     end
 
-    return Vector3.new(config.X or 4, config.Y or 6, config.Z or 2)
+    cachedWeaponFOV = Vector3.new(config.X or 4, config.Y or 6, config.Z or 2)
+    return cachedWeaponFOV
 end)
 
 local isVisible = LPH_NO_VIRTUALIZE(function(rootPart)
@@ -224,57 +236,50 @@ oldRandom = hookfunction(math.random, LPH_NO_VIRTUALIZE(function(...)
     return oldRandom(...)
 end))
 
-local updateKnockChecks = LPH_NO_VIRTUALIZE(function()
-    local targetChar = lockedPlayer and lockedPlayer.Character
-    local selfChar = LocalPlayer.Character
-    
-    if selfChar and shared.config.Conditions['Whilst a player is selected']['Self Knocked'] then
-        local selfBodyEffects = selfChar:FindFirstChild("BodyEffects")
-        selfKnocked = selfBodyEffects and selfBodyEffects:FindFirstChild("K.O") and selfBodyEffects["K.O"].Value
-    else
-        selfKnocked = false
-    end
-    if targetChar and shared.config.Conditions['Whilst a player is selected']['Knock Check'] then
-        local targetBodyEffects = targetChar:FindFirstChild("BodyEffects")
-        targetKnocked = targetBodyEffects and targetBodyEffects:FindFirstChild("K.O") and targetBodyEffects["K.O"].Value
-    else
-        targetKnocked = false
-    end
-end)
-
 local getCamlockFOV = LPH_NO_VIRTUALIZE(function()
+    local char = LocalPlayer.Character
+    local tool = char and char:FindFirstChildOfClass("Tool")
+    if tool == lastWeaponTool and cachedCamFOV then
+        return cachedCamFOV
+    end
+    lastWeaponTool = tool
+
     local cam = shared.config['Camera Aimbot']
     local fovMain = cam.FOV
 
     if not fovMain.Enabled then
-        return Vector3.new(9999, 9999, 9999)
+        cachedCamFOV = Vector3.new(9999, 9999, 9999)
+        return cachedCamFOV
     end
 
     local wc = fovMain['Weapon Configuration']
     if not wc.Enabled then
         local base = fovMain.Size
-        return Vector3.new(base.X or 0, base.Y or 0, base.Z or 0)
+        cachedCamFOV = Vector3.new(base.X or 0, base.Y or 0, base.Z or 0)
+        return cachedCamFOV
     end
 
-    local character = LocalPlayer.Character
-    if not character then return Vector3.new(4, 6, 2) end
+    if not char then
+        cachedCamFOV = Vector3.new(4, 6, 2)
+        return cachedCamFOV
+    end
 
-    local tool = character:FindFirstChildOfClass("Tool")
-    if not tool then return Vector3.new(wc.Others.X or 4, wc.Others.Y or 6, wc.Others.Z or 2) end
+    if not tool then
+        cachedCamFOV = Vector3.new(wc.Others.X or 4, wc.Others.Y or 6, wc.Others.Z or 2)
+        return cachedCamFOV
+    end
 
     local weaponName = tool.Name:gsub("[%[%]]", "")
     local config = wc.Others
     
-    if ShotgunNames[weaponName] then config = wc.Shotguns
-    elseif PistolNames[weaponName] then config = wc.Pistols end
-    
-    return Vector3.new(config.X or 4, config.Y or 6, config.Z or 2)
-end)
+    if ShotgunNames[weaponName] then
+        config = wc.Shotguns
+    elseif PistolNames[weaponName] then
+        config = wc.Pistols
+    end
 
-local getTriggerbotFOV = LPH_NO_VIRTUALIZE(function()
-    local tb = shared.config['Trigger Bot']
-    local fov = tb.FOV
-    return Vector3.new(fov.X or 0, fov.Y or 0, fov.Z or 0)
+    cachedCamFOV = Vector3.new(config.X or 4, config.Y or 6, config.Z or 2)
+    return cachedCamFOV
 end)
 
 local isMouseInCamBox = LPH_NO_VIRTUALIZE(function()
@@ -499,7 +504,6 @@ local function createSilentBox(targetPlayer)
     box.ZIndex = 10
     box.Adornee = targetPlayer.Character
     box.Parent  = targetPlayer.Character
-    if not BOX_VISIBLE then box.Transparency = 1 end
 end
 
 local function createTriggerBox(targetPlayer)
@@ -554,11 +558,6 @@ local isMouseInBox = LPH_NO_VIRTUALIZE(function()
 
     return tNear <= tFar and tFar >= 0
 end)
-
-local function getToggleKey()
-    local toggleChar = shared.config.Toggle
-    return Enum.KeyCode[toggleChar]
-end
 
 UserInput.InputBegan:Connect(LPH_NO_VIRTUALIZE(function(inp, gp)
     if gp then return end
@@ -671,41 +670,54 @@ ChinaHook = hookmetamethod(game, "__namecall", LPH_NO_VIRTUALIZE(function(self, 
     return ChinaHook(self, ...)
 end))
 
+-- Define cubicInOut once outside the loop for performance
+local function cubicInOut(t)
+    if t < 0.5 then
+        return 4 * t * t * t
+    else
+        return 1 - math.pow(-2 * t + 2, 3) / 2
+    end
+end
+
 RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
+    local config = shared.config
+    local conditions = config.Conditions["Whilst a player is selected"]
+    local silentAim = config['Silent Aim']
+    local cameraAimbot = config['Camera Aimbot']
+    local triggerBot = config['Trigger Bot']
+
     -- Conditions for manualTarget (used by camera aimbot)
     if manualTarget then
-        local selectedCond = shared.config.Conditions["Whilst a player is selected"]
         local selfChar = LocalPlayer.Character
         local targetChar = manualTarget.Character
         local shouldUnlock = false
 
-        if selectedCond["Self Knocked"] then
+        if conditions["Self Knocked"] then
             local be = selfChar and selfChar:FindFirstChild("BodyEffects")
             if be and be:FindFirstChild("K.O") and be["K.O"].Value then
                 shouldUnlock = true
             end
         end
 
-        if selectedCond["Knock Check"] then
+        if conditions["Knock Check"] then
             local be = targetChar and targetChar:FindFirstChild("BodyEffects")
             if be and be:FindFirstChild("K.O") and be["K.O"].Value then
                 shouldUnlock = true
             end
         end
 
-        if selectedCond["Crew Check"] and isSameCrew(manualTarget) then
+        if conditions["Crew Check"] and isSameCrew(manualTarget) then
             shouldUnlock = true
         end
 
-        if selectedCond["Visible"] and not isTargetVisible(targetChar) then
+        if conditions["Visible"] and not isTargetVisible(targetChar) then
             shouldUnlock = true
         end
 
         if shouldUnlock then
             manualTarget = nil
             if camBox then camBox:Destroy() camBox = nil end
-            -- If silent aim is in Target mode, also clear it
-            if shared.config['Silent Aim'].Mode == 'Target' then
+            if silentAim.Mode == 'Target' then
                 silentAimTarget = nil
                 if box then box:Destroy() box = nil end
             end
@@ -714,22 +726,21 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
 
     -- Conditions for silentAimTarget (if different from manualTarget)
     if silentAimTarget and silentAimTarget ~= manualTarget then
-        local selectedCond = shared.config.Conditions["Whilst a player is selected"]
         local targetChar = silentAimTarget.Character
         local shouldClear = false
 
-        if selectedCond["Knock Check"] then
+        if conditions["Knock Check"] then
             local be = targetChar and targetChar:FindFirstChild("BodyEffects")
             if be and be:FindFirstChild("K.O") and be["K.O"].Value then
                 shouldClear = true
             end
         end
 
-        if selectedCond["Crew Check"] and isSameCrew(silentAimTarget) then
+        if conditions["Crew Check"] and isSameCrew(silentAimTarget) then
             shouldClear = true
         end
 
-        if selectedCond["Visible"] and not isTargetVisible(targetChar) then
+        if conditions["Visible"] and not isTargetVisible(targetChar) then
             shouldClear = true
         end
 
@@ -740,7 +751,7 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
     end
 
     -- Silent Aim Auto mode (only if enabled and set to 'Auto')
-    if shared.config['Silent Aim'].Enabled and shared.config['Silent Aim'].Mode == 'Auto' then
+    if silentAim.Enabled and silentAim.Mode == 'Auto' then
         local closest = getClosestPlayerToMouse()
         if closest and closest.Character and canTargetPlayer(closest) then
             silentAimTarget = closest
@@ -749,7 +760,7 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
             silentAimTarget = nil
             if box then box:Destroy() box = nil end
         end
-    elseif shared.config['Silent Aim'].Enabled and shared.config['Silent Aim'].Mode == 'Target' then
+    elseif silentAim.Enabled and silentAim.Mode == 'Target' then
         -- In Target mode, silent aim follows manualTarget
         if manualTarget and manualTarget.Character and canTargetPlayer(manualTarget) then
             silentAimTarget = manualTarget
@@ -772,17 +783,14 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
     end
 
     if triggerBox and silentAimTarget and silentAimTarget.Character then
-        local fov = shared.config['Trigger Bot'].FOV
-        triggerBox.Size = Vector3.new(fov.X or 0, fov.Y or 0, fov.Z or 0)
+        triggerBox.Size = Vector3.new(triggerBot.FOV.X or 0, triggerBot.FOV.Y or 0, triggerBot.FOV.Z or 0)
         triggerBox.Adornee = silentAimTarget.Character
     end
 
     -- Trigger bot logic
-    if silentAimTarget and shared.config['Trigger Bot'].Enabled and (not shared.config.Conditions["Whilst a player is selected"]["Visible"] or isTargetVisible(silentAimTarget.Character)) then
-        local tb = shared.config['Trigger Bot']
-        local mode = tb['Activation']['Activation Mode']
-        local cooldown = tb['Click Cooldown']
-
+    if silentAimTarget and triggerBot.Enabled and (not conditions["Visible"] or isTargetVisible(silentAimTarget.Character)) then
+        local mode = triggerBot.Activation['Activation Mode']
+        local cooldown = triggerBot['Click Cooldown']
         local char = LocalPlayer.Character
         local hasKnife = char and (char:FindFirstChild("[Knife]") or char:FindFirstChild("Knife"))
 
@@ -814,13 +822,12 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
     -- Camera aimbot (always uses manualTarget)
     if manualTarget 
         and manualTarget.Character 
-        and shared.config['Camera Aimbot'].Enabled 
-        and (not shared.config.Conditions["Whilst a player is selected"]["Visible"] or isTargetVisible(manualTarget.Character))
-        and (not shared.config.Conditions["Whilst a player is selected"]["Crew Check"] or not isSameCrew(manualTarget))
+        and cameraAimbot.Enabled 
+        and (not conditions["Visible"] or isTargetVisible(manualTarget.Character))
+        and (not conditions["Crew Check"] or not isSameCrew(manualTarget))
         and isMouseInCamBox() 
     then
-        local camConfig = shared.config['Camera Aimbot']
-        local checks = camConfig['Camera Aimbot Checks']
+        local checks = cameraAimbot['Camera Aimbot Checks']
         local zoomDist = (Camera.CFrame.Position - Camera.Focus.Position).Magnitude
         local isFirstPerson = zoomDist < 1
         local isThirdPerson = zoomDist >= 1
@@ -829,10 +836,9 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
         local fpAllowed = checks['First Person'] and isFirstPerson
         local tpAllowed = checks['Third Person'] and isThirdPerson
         local rcAllowed = not checks['Right Click'] or rightClickHeld
-        local selectedCond = shared.config.Conditions["Whilst a player is selected"]
         local targetVisible = true
 
-        if selectedCond["Visible"] then
+        if conditions["Visible"] then
             local head = manualTarget.Character:FindFirstChild("Head")
             if head then
                 local rayParams = RaycastParams.new()
@@ -845,9 +851,9 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
         end
 
         if (fpAllowed or tpAllowed) and rcAllowed and targetVisible 
-            and (not selectedCond["Crew Check"] or not isSameCrew(manualTarget))
+            and (not conditions["Crew Check"] or not isSameCrew(manualTarget))
         then
-            local hitPartName = camConfig['Hit Part']
+            local hitPartName = cameraAimbot['Hit Part']
             local targetPart
             if hitPartName == "Closest Part" then
                 targetPart = getClosestPart(manualTarget.Character)
@@ -858,23 +864,15 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
                 end
             end
             if targetPart then
-                local pred = camConfig.Prediction
+                local pred = cameraAimbot.Prediction
                 local vel = targetPart.Velocity
                 local predictedPos = targetPart.Position + Vector3.new(
                     vel.X * pred.X,
                     vel.Y * pred.Y,
                     vel.Z * pred.Z
                 )
-               
-                local function cubicInOut(t)
-                    if t < 0.5 then
-                        return 4 * t * t * t
-                    else
-                        return 1 - math.pow(-2 * t + 2, 3) / 2
-                    end
-                end
 
-                local baseSnappiness = camConfig.Snappiness or 0.1
+                local baseSnappiness = cameraAimbot.Snappiness or 0.1
 
                 local direction = (predictedPos - Camera.CFrame.Position).Unit
                 local currentLook = Camera.CFrame.LookVector
