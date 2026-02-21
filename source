@@ -9,7 +9,9 @@ APPVersion = "1.0"     --* Application Version
 local req = game:HttpGet('https://keyauth.win/api/1.1/?name=' .. Name .. '&ownerid=' .. Ownerid .. '&type=init&ver=' .. APPVersion)
 if req == "KeyAuth_Invalid" then 
    local player = Players.LocalPlayer
-       player:Kick("Error: Application not found.")
+    if shared.config['Console'] == true then
+        print("> Error ❌".. data.message) 
+    end
 return false
 end
 
@@ -20,23 +22,29 @@ if data.success == true then
 elseif (data.message == "invalidver") then
    local player = Players.LocalPlayer
    if player then
-       player:Kick("Error: Wrong application version.")
+    if shared.config['Console'] == true then
+        print("> Error ❌".. data.message) 
+    end
    end
    return false
 else
    local player = Players.LocalPlayer
-       player:Kick("Error: " .. data.message)
+    if shared.config['Console'] == true then
+        print("> Error ❌".. data.message) 
+    end
    return false
 end
 local req = game:HttpGet('https://keyauth.win/api/1.1/?name=' .. Name .. '&ownerid=' .. Ownerid .. '&type=license&key=' .. shared.config.License ..'&ver=' .. APPVersion .. '&sessionid=' .. sessionid)
 local data = HttpService:JSONDecode(req)
 if data.success == false then 
     local player = Players.LocalPlayer
-        player:Kick("Error: " .. data.message)
+    if shared.config['Console'] == true then
+        print("> Error ❌".. data.message) 
+    end
     return false
 end
 
-local v = "v1 BETA"
+local v = "V1"
 
 if _G.Loaded == true then 
     if shared.config['Console'] == true then
@@ -46,13 +54,13 @@ if _G.Loaded == true then
         return
     end
 end
-
+if shared.config['Console'] == true then
+    print("> Key Accepted ✅") 
+end
 _G.Loaded = true
 loadstring([[function LPH_NO_VIRTUALIZE(f) return f end;]])();
 if shared.config['Console'] == true then
     print("> Loading.. " .. v .. " ❓")
-else
-    return 
 end
 local manualTarget = nil
 local silentAimTarget = nil
@@ -71,8 +79,10 @@ local originalIndex
 local box = nil
 local camBox = nil
 local lastWeaponTool = nil
-local cachedWeaponFOV = Vector3.new(5, 6.5, 3)   -- default from config
-local cachedCamFOV   = Vector3.new(10, 10, 10)  -- default from config
+local cachedWeaponFOV = Vector3.new(5, 6.5, 3)
+local cachedCamFOV   = Vector3.new(10, 10, 10)
+local lastAutoUpdate = 0
+local AUTO_UPDATE_INTERVAL = 0.1
 
 local ShotgunNames = { 
     ["Double-Barrel SG"] = true, 
@@ -750,27 +760,49 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
         end
     end
 
-    -- Silent Aim Auto mode (only if enabled and set to 'Auto')
     if silentAim.Enabled and silentAim.Mode == 'Auto' then
-        local closest = getClosestPlayerToMouse()
-        if closest and closest.Character and canTargetPlayer(closest) then
-            silentAimTarget = closest
-            if not box then createSilentBox(closest) end
-        else
-            silentAimTarget = nil
-            if box then box:Destroy() box = nil end
+        local now = tick()
+        if now - lastAutoUpdate >= AUTO_UPDATE_INTERVAL then
+            lastAutoUpdate = now
+            local closest = getClosestPlayerToMouse()
+            if closest and closest.Character and canTargetPlayer(closest) then
+                if silentAimTarget ~= closest then
+                    silentAimTarget = closest
+                    if box then
+                        box.Adornee = closest.Character
+                    else
+                        createSilentBox(closest)
+                    end
+                end
+            else
+                if silentAimTarget then
+                    silentAimTarget = nil
+                    if box then box:Destroy() box = nil end
+                end
+            end
         end
+        if silentAimTarget then
+            if not (silentAimTarget.Character and canTargetPlayer(silentAimTarget)) then
+                silentAimTarget = nil
+                if box then box:Destroy() box = nil end
+            end
+        end
+
     elseif silentAim.Enabled and silentAim.Mode == 'Target' then
-        -- In Target mode, silent aim follows manualTarget
         if manualTarget and manualTarget.Character and canTargetPlayer(manualTarget) then
-            silentAimTarget = manualTarget
-            if not box then createSilentBox(manualTarget) end
+            if silentAimTarget ~= manualTarget then
+                silentAimTarget = manualTarget
+                if not box then
+                    createSilentBox(manualTarget)
+                else
+                    box.Adornee = manualTarget.Character
+                end
+            end
         else
             silentAimTarget = nil
             if box then box:Destroy() box = nil end
         end
     end
-
     -- Update boxes
     if box and silentAimTarget and silentAimTarget.Character then
         box.Size = getCurrentWeaponFOV()
