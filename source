@@ -83,45 +83,42 @@ local cachedWeaponFOV = Vector3.new(5, 6.5, 3)
 local cachedCamFOV   = Vector3.new(10, 10, 10)
 local lastAutoUpdate = 0
 local AUTO_UPDATE_INTERVAL = 0.1
+local debugGuiEnabled = shared.config.Info and shared.config.Info.Enabled or true
+local debugGuiPosition = shared.config.Info and shared.config.Info.Position or {X=200, Y=50}
 
--- Debug GUI settings
-local debugGuiEnabled = true   -- Set to false to disable overlay
-local debugGuiPosition = Vector2.new(200, 50) -- X, Y position on screen
-
--- Create GUI elements
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "DebugOverlay"
+screenGui.Name = "bwq2"
 screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.Parent = game:GetService("CoreGui") -- Use CoreGui for visibility
+screenGui.Parent = game:GetService("CoreGui")
 
 local silentLabel = Instance.new("TextLabel")
-silentLabel.Name = "SilentTarget"
+silentLabel.Name = "zxcxwa2"
 silentLabel.Size = UDim2.new(0, 200, 0, 20)
 silentLabel.Position = UDim2.new(0, debugGuiPosition.X, 0, debugGuiPosition.Y)
 silentLabel.BackgroundTransparency = 1
-silentLabel.Text = "Silent: OFF"
+silentLabel.Text = "silent: false"
 silentLabel.TextColor3 = Color3.new(1, 1, 1)
 silentLabel.TextStrokeTransparency = 0.8
 silentLabel.Font = Enum.Font.Gotham
 silentLabel.TextSize = 14
 silentLabel.TextXAlignment = Enum.TextXAlignment.Left
+silentLabel.RichText = true
 silentLabel.Parent = screenGui
 
-local manualLabel = Instance.new("TextLabel")
-manualLabel.Name = "ManualTarget"
-manualLabel.Size = UDim2.new(0, 200, 0, 20)
-manualLabel.Position = UDim2.new(0, debugGuiPosition.X, 0, debugGuiPosition.Y + 20)
-manualLabel.BackgroundTransparency = 1
-manualLabel.Text = "Manual: OFF"
-manualLabel.TextColor3 = Color3.new(1, 1, 1)
-manualLabel.TextStrokeTransparency = 0.8
-manualLabel.Font = Enum.Font.Gotham
-manualLabel.TextSize = 14
-manualLabel.TextXAlignment = Enum.TextXAlignment.Left
-manualLabel.Parent = screenGui
-
--- Update function to be called in RenderStepped
+local cameraLabel = Instance.new("TextLabel")
+cameraLabel.Name = "vacxx3"
+cameraLabel.Size = UDim2.new(0, 200, 0, 20)
+cameraLabel.Position = UDim2.new(0, debugGuiPosition.X, 0, debugGuiPosition.Y + 20)
+cameraLabel.BackgroundTransparency = 1
+cameraLabel.Text = "camera: false"
+cameraLabel.TextColor3 = Color3.new(1, 1, 1)
+cameraLabel.TextStrokeTransparency = 0.8
+cameraLabel.Font = Enum.Font.Gotham
+cameraLabel.TextSize = 14
+cameraLabel.TextXAlignment = Enum.TextXAlignment.Left
+cameraLabel.RichText = true
+cameraLabel.Parent = screenGui
 local function updateDebugGUI()
     if not debugGuiEnabled then 
         screenGui.Enabled = false
@@ -130,24 +127,31 @@ local function updateDebugGUI()
         screenGui.Enabled = true
     end
     
-    -- Silent target
-    if silentAimTarget and silentAimTarget.Character then
-        local name = silentAimTarget.DisplayName or silentAimTarget.Name
-        silentLabel.Text = "Silent: " .. name
+    local silentAim = shared.config['Silent Aim']
+    local cameraAimbot = shared.config['Camera Aimbot']
+    if silentAim.Enabled then
+        if silentAimTarget and silentAimTarget.Character then
+            local name = silentAimTarget.DisplayName or silentAimTarget.Name
+            silentLabel.Text = "silent: " .. name
+        else
+            silentLabel.Text = "silent: None"
+        end
         silentLabel.TextColor3 = Color3.new(1, 1, 1)
     else
-        silentLabel.Text = "Silent: OFF"
-        silentLabel.TextColor3 = Color3.new(1, 0, 0)
+        silentLabel.Text = "silent: <color=#FF0000>OFF</color>"
+        silentLabel.TextColor3 = Color3.new(1, 1, 1)
     end
-    
-    -- Manual target
-    if manualTarget and manualTarget.Character then
-        local name = manualTarget.DisplayName or manualTarget.Name
-        manualLabel.Text = "Manual: " .. name
-        manualLabel.TextColor3 = Color3.new(1, 1, 1)
+    if cameraAimbot.Enabled then
+        if manualTarget and manualTarget.Character then
+            local name = manualTarget.DisplayName or manualTarget.Name
+            cameraLabel.Text = "camera: " .. name
+        else
+            cameraLabel.Text = "camera: None"
+        end
+        cameraLabel.TextColor3 = Color3.new(1, 1, 1)
     else
-        manualLabel.Text = "Manual: OFF"
-        manualLabel.TextColor3 = Color3.new(1, 0, 0)
+        cameraLabel.Text = "camera: <color=#FF0000>OFF</color>"
+        cameraLabel.TextColor3 = Color3.new(1, 1, 1)
     end
 end
 
