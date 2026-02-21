@@ -84,6 +84,73 @@ local cachedCamFOV   = Vector3.new(10, 10, 10)
 local lastAutoUpdate = 0
 local AUTO_UPDATE_INTERVAL = 0.1
 
+-- Debug GUI settings
+local debugGuiEnabled = true   -- Set to false to disable overlay
+local debugGuiPosition = Vector2.new(200, 50) -- X, Y position on screen
+
+-- Create GUI elements
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "DebugOverlay"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = game:GetService("CoreGui") -- Use CoreGui for visibility
+
+local silentLabel = Instance.new("TextLabel")
+silentLabel.Name = "SilentTarget"
+silentLabel.Size = UDim2.new(0, 200, 0, 20)
+silentLabel.Position = UDim2.new(0, debugGuiPosition.X, 0, debugGuiPosition.Y)
+silentLabel.BackgroundTransparency = 1
+silentLabel.Text = "Silent: OFF"
+silentLabel.TextColor3 = Color3.new(1, 1, 1)
+silentLabel.TextStrokeTransparency = 0.8
+silentLabel.Font = Enum.Font.Gotham
+silentLabel.TextSize = 14
+silentLabel.TextXAlignment = Enum.TextXAlignment.Left
+silentLabel.Parent = screenGui
+
+local manualLabel = Instance.new("TextLabel")
+manualLabel.Name = "ManualTarget"
+manualLabel.Size = UDim2.new(0, 200, 0, 20)
+manualLabel.Position = UDim2.new(0, debugGuiPosition.X, 0, debugGuiPosition.Y + 20)
+manualLabel.BackgroundTransparency = 1
+manualLabel.Text = "Manual: OFF"
+manualLabel.TextColor3 = Color3.new(1, 1, 1)
+manualLabel.TextStrokeTransparency = 0.8
+manualLabel.Font = Enum.Font.Gotham
+manualLabel.TextSize = 14
+manualLabel.TextXAlignment = Enum.TextXAlignment.Left
+manualLabel.Parent = screenGui
+
+-- Update function to be called in RenderStepped
+local function updateDebugGUI()
+    if not debugGuiEnabled then 
+        screenGui.Enabled = false
+        return 
+    else
+        screenGui.Enabled = true
+    end
+    
+    -- Silent target
+    if silentAimTarget and silentAimTarget.Character then
+        local name = silentAimTarget.DisplayName or silentAimTarget.Name
+        silentLabel.Text = "Silent: " .. name
+        silentLabel.TextColor3 = Color3.new(1, 1, 1)
+    else
+        silentLabel.Text = "Silent: OFF"
+        silentLabel.TextColor3 = Color3.new(1, 0, 0)
+    end
+    
+    -- Manual target
+    if manualTarget and manualTarget.Character then
+        local name = manualTarget.DisplayName or manualTarget.Name
+        manualLabel.Text = "Manual: " .. name
+        manualLabel.TextColor3 = Color3.new(1, 1, 1)
+    else
+        manualLabel.Text = "Manual: OFF"
+        manualLabel.TextColor3 = Color3.new(1, 0, 0)
+    end
+end
+
 local ShotgunNames = { 
     ["Double-Barrel SG"] = true, 
     ["TacticalShotgun"] = true, 
@@ -922,6 +989,7 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
             end
         end
     end
+    updateDebugGUI()
 end))
 if shared.config['Console'] == true then
     print("> Loaded ✅") 
