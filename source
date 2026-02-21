@@ -64,18 +64,19 @@ if _G.Loaded == true then
 end
 
 if shared.config['Console'] == true then
-print("UG → [<⬇️>] - Loading game..")
+    print("UG → [<✅>] - Key Accepted")
+end
+
+if shared.config['Console'] == true then
+print("UG → [<⬇️>] - Loading game")
 end
 
 repeat task.wait() until game:IsLoaded()
 
 if shared.config['Console'] == true then
-print("UG → [<✅>] - Game Loaded..")
+print("UG → [<✅>] - Game Loaded")
 end
 
-if shared.config['Console'] == true then
-    print("UG → [<✅>] - Key Accepted")
-end
 _G.Loaded = true
 loadstring([[function LPH_NO_VIRTUALIZE(f) return f end;]])();
 if shared.config['Console'] == true then
