@@ -134,7 +134,7 @@ local function updateDebugGUI()
             local name = silentAimTarget.DisplayName or silentAimTarget.Name
             silentLabel.Text = "silent: " .. name
         else
-            silentLabel.Text = "silent: None"
+            silentLabel.Text = "silent: none"
         end
         silentLabel.TextColor3 = Color3.new(1, 1, 1)
     else
@@ -146,7 +146,7 @@ local function updateDebugGUI()
             local name = manualTarget.DisplayName or manualTarget.Name
             cameraLabel.Text = "camera: " .. name
         else
-            cameraLabel.Text = "camera: None"
+            cameraLabel.Text = "camera: none"
         end
         cameraLabel.TextColor3 = Color3.new(1, 1, 1)
     else
