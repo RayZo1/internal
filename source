@@ -46,6 +46,15 @@ end
 
 local v = "Executor 1.2"
 
+task.spawn(function()
+    while task.wait(1) do
+        if shared._configUpdated then
+            shared._configUpdated = false
+            setupESPKeybind()
+        end
+    end
+end)
+
 if _G.Loaded == true then 
     if shared.config['Console'] == true then
         print("UG → [<✅>] - Updated config") 
@@ -154,6 +163,304 @@ local function updateDebugGUI()
         cameraLabel.TextColor3 = Color3.new(1, 1, 1)
     end
 end
+
+-- ========== ESP Script (auto‑updates on config change) ==========
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+-- Load config (these will be refreshed on update)
+local espConfig = shared.config and shared.config.ESP or {}
+local enabled = espConfig.Enabled or false
+local key = espConfig.Key
+local holdMode = espConfig.Hold
+-- Note: 'features' is NOT cached locally – we'll read it directly inside updateESP
+
+-- State
+local espEnabled = (holdMode == nil) -- if nil, always on from start
+local keyDown = false
+local toggledState = false
+local espObjects = {}                 -- Player -> BillboardGui
+
+-- Store keybind connections so we can disconnect them on config update
+local espKeyConnections = {}
+
+-- Helper to create a BillboardGui for a player
+local function createESP(player)
+    local function onCharacterAdded(character)
+        -- Remove old ESP if any
+        if espObjects[player] then
+            espObjects[player]:Destroy()
+            espObjects[player] = nil
+        end
+
+        -- Wait for essential parts (with timeout to avoid freezing)
+        local humanoid = character:WaitForChild("Humanoid", 5)
+        local bodyEffects = character:WaitForChild("BodyEffects", 5)
+        if not (humanoid and bodyEffects) then
+            return -- Can't show ESP without these
+        end
+
+        -- Determine attachment point (Head or HumanoidRootPart)
+        local head = character:FindFirstChild("Head") or character:FindFirstChild("HumanoidRootPart")
+        if not head then return end
+
+        -- Create BillboardGui
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "PlayerESP"
+        billboard.Adornee = head
+        billboard.Size = UDim2.new(0, 200, 0, 100)
+        billboard.StudsOffset = Vector3.new(0, 3, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Enabled = espEnabled
+        billboard.Parent = character
+
+        -- Text label
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.TextStrokeTransparency = 0.5
+        textLabel.TextColor3 = Color3.new(1, 1, 1)
+        textLabel.Font = Enum.Font.GothamSemibold
+        textLabel.TextSize = 14
+        textLabel.TextXAlignment = Enum.TextXAlignment.Center
+        textLabel.TextYAlignment = Enum.TextYAlignment.Top
+        textLabel.Text = ""
+        textLabel.Parent = billboard
+
+        espObjects[player] = billboard
+
+        -- Update function – reads features directly from the live config
+        local function updateESP()
+            if not character or not character.Parent then return end
+
+            local features = shared.config.ESP.Features or {}
+            local lines = {}
+
+            -- Name
+            local nameFeature = features.Name
+            if nameFeature == "Display" then
+                lines[#lines+1] = player.DisplayName
+            elseif nameFeature == "User" then
+                lines[#lines+1] = player.Name
+            end
+
+            -- Knock check
+            if features.KnockCheck and knocked then
+                lines[#lines+1] = '<font color="#FF0000">X</font>'
+            end
+
+            -- Health
+            if features.Health and humanoid then
+                local health = math.floor(humanoid.Health)
+                local maxHealth = math.floor(humanoid.MaxHealth)
+                lines[#lines+1] = string.format("❤️‍🩹 %d/%d", health, maxHealth)
+            end
+
+            -- Armor
+            if features.Armor then
+                local armorVal = bodyEffects:FindFirstChild("Armor")
+                local armor = armorVal and armorVal.Value or 0
+                lines[#lines+1] = string.format("🛡️ %d", armor)
+            end
+
+            -- Holding tool
+            if features.HoldingTool then
+                local tool = character:FindFirstChildOfClass("Tool")
+                if tool then
+                    lines[#lines+1] = tool.Name
+                end
+            end
+
+            textLabel.Text = table.concat(lines, "\n")
+        end
+
+        -- Connect signals
+        local connections = {}
+
+        if humanoid then
+            connections[#connections+1] = humanoid:GetPropertyChangedSignal("Health"):Connect(updateESP)
+            connections[#connections+1] = humanoid:GetPropertyChangedSignal("MaxHealth"):Connect(updateESP)
+        end
+
+        local armorVal = bodyEffects:FindFirstChild("Armor")
+        if armorVal then
+            connections[#connections+1] = armorVal:GetPropertyChangedSignal("Value"):Connect(updateESP)
+        end
+
+        local knockVal = bodyEffects:FindFirstChild("K.O")
+        if knockVal then
+            connections[#connections+1] = knockVal:GetPropertyChangedSignal("Value"):Connect(updateESP)
+        end
+
+        -- Tool change detection (RenderStepped is fine)
+        local lastTool = nil
+        connections[#connections+1] = RunService.RenderStepped:Connect(function()
+            local currentTool = character:FindFirstChildOfClass("Tool")
+            if currentTool ~= lastTool then
+                lastTool = currentTool
+                updateESP()
+            end
+        end)
+
+        updateESP()
+
+        -- Cleanup
+        local function cleanup()
+            for _, conn in ipairs(connections) do
+                conn:Disconnect()
+            end
+            if espObjects[player] == billboard then
+                espObjects[player] = nil
+            end
+            billboard:Destroy()
+        end
+
+        character.AncestryChanged:Connect(function()
+            if not character.Parent then
+                cleanup()
+            end
+        end)
+    end
+
+    if player.Character then
+        onCharacterAdded(player.Character)
+    end
+
+    player.CharacterAdded:Connect(onCharacterAdded)
+end
+
+-- Function to destroy all ESP objects (used when config changes)
+local function destroyAllESP()
+    for player, billboard in pairs(espObjects) do
+        billboard:Destroy()
+    end
+    espObjects = {}
+end
+
+-- Function to recreate ESP for all players (used when config changes)
+local function recreateAllESP()
+    destroyAllESP()
+    if enabled then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                createESP(player)
+            end
+        end
+    end
+end
+
+-- Function to set up the keybind (called on startup and on config update)
+local function setupESPKeybind()
+    -- Disconnect old keybind connections
+    for _, conn in ipairs(espKeyConnections) do
+        conn:Disconnect()
+    end
+    espKeyConnections = {}
+
+    -- Reload config values
+    espConfig = shared.config and shared.config.ESP or {}
+    enabled = espConfig.Enabled or false
+    key = espConfig.Key
+    holdMode = espConfig.Hold
+
+    -- Update the global espEnabled state based on new holdMode
+    if holdMode == nil then
+        espEnabled = true
+    else
+        espEnabled = false  -- will be turned on by key
+        toggledState = false
+        keyDown = false
+    end
+
+    -- Apply the new enabled state to all existing ESP billboards
+    for _, billboard in pairs(espObjects) do
+        billboard.Enabled = espEnabled
+    end
+
+    -- If ESP is disabled in config, destroy all ESP objects
+    if not enabled then
+        destroyAllESP()
+        return
+    end
+
+    -- If ESP is enabled but no objects exist (e.g., just turned on), create them
+    if enabled and next(espObjects) == nil then
+        recreateAllESP()
+    end
+
+    -- Set up new keybind
+    local keyCode = Enum.KeyCode[key]
+    if not keyCode then return end
+
+    if holdMode == true then
+        -- Hold mode
+        local beganConn = UserInputService.InputBegan:Connect(function(input, gp)
+            if gp then return end
+            if input.KeyCode == keyCode then
+                keyDown = true
+                espEnabled = true
+                for _, billboard in pairs(espObjects) do
+                    billboard.Enabled = true
+                end
+            end
+        end)
+        table.insert(espKeyConnections, beganConn)
+
+        local endedConn = UserInputService.InputEnded:Connect(function(input, gp)
+            if gp then return end
+            if input.KeyCode == keyCode then
+                keyDown = false
+                espEnabled = false
+                for _, billboard in pairs(espObjects) do
+                    billboard.Enabled = false
+                end
+            end
+        end)
+        table.insert(espKeyConnections, endedConn)
+
+    elseif holdMode == false then
+        -- Toggle mode
+        local beganConn = UserInputService.InputBegan:Connect(function(input, gp)
+            if gp then return end
+            if input.KeyCode == keyCode then
+                toggledState = not toggledState
+                espEnabled = toggledState
+                for _, billboard in pairs(espObjects) do
+                    billboard.Enabled = espEnabled
+                end
+            end
+        end)
+        table.insert(espKeyConnections, beganConn)
+    end
+end
+
+-- Initialize ESP on script start
+setupESPKeybind()
+if enabled then
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            createESP(player)
+        end
+    end
+end
+
+-- Handle new players joining
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer and enabled then
+        createESP(player)
+    end
+end)
+
+-- Remove ESP when player leaves
+Players.PlayerRemoving:Connect(function(player)
+    if espObjects[player] then
+        espObjects[player]:Destroy()
+        espObjects[player] = nil
+    end
+end)
+-- ========== End of ESP Script ==========
 
 local ShotgunNames = { 
     ["Double-Barrel SG"] = true, 
