@@ -10,7 +10,7 @@ local req = game:HttpGet('https://keyauth.win/api/1.1/?name=' .. Name .. '&owner
 if req == "KeyAuth_Invalid" then 
    local player = Players.LocalPlayer
     if shared.config['Console'] == true then
-        print("> Error ❌".. data.message) 
+        print("UG → [<❌>] Error - ".. data.message) 
     end
 return false
 end
@@ -23,14 +23,14 @@ elseif (data.message == "invalidver") then
    local player = Players.LocalPlayer
    if player then
     if shared.config['Console'] == true then
-        print("> Error ❌".. data.message) 
+        print("UG → [<❌>] Error - ".. data.message) 
     end
    end
    return false
 else
    local player = Players.LocalPlayer
     if shared.config['Console'] == true then
-        print("> Error ❌".. data.message) 
+        print("UG → [<❌>] Error - ".. data.message) 
     end
    return false
 end
@@ -39,27 +39,27 @@ local data = HttpService:JSONDecode(req)
 if data.success == false then 
     local player = Players.LocalPlayer
     if shared.config['Console'] == true then
-        print("> Error ❌".. data.message) 
+        print("UG → [<❌>] Error - ".. data.message) 
     end
     return false
 end
 
-local v = "V1.1"
+local v = "Executor 1.2"
 
 if _G.Loaded == true then 
     if shared.config['Console'] == true then
-        print("> Updated config ✅") 
+        print("UG → [<✅>] - Updated config") 
     end
     shared._configUpdated = true
     return
 end
 if shared.config['Console'] == true then
-    print("> Key Accepted ✅") 
+    print("UG → [<✅>] - Key Accepted") 
 end
 _G.Loaded = true
 loadstring([[function LPH_NO_VIRTUALIZE(f) return f end;]])();
 if shared.config['Console'] == true then
-    print("> Loading.. " .. v .. " ❓")
+    print("UG → [<⬇️>] - Loading Version " .. v)
 end
 local manualTarget = nil
 local silentAimTarget = nil
@@ -80,16 +80,11 @@ local camBox = nil
 local lastWeaponTool = nil
 local cachedWeaponFOV = Vector3.new(5, 6.5, 3)
 local cachedCamFOV   = Vector3.new(10, 10, 10)
-local lastAutoUpdate = 0
-local AUTO_UPDATE_INTERVAL = 0.1
-
-
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "bwq2"
 screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = game:GetService("CoreGui")
-
 local silentLabel = Instance.new("TextLabel")
 silentLabel.Name = "zxcxwa2"
 silentLabel.Size = UDim2.new(0, 200, 0, 20)
@@ -103,7 +98,6 @@ silentLabel.TextSize = 14
 silentLabel.TextXAlignment = Enum.TextXAlignment.Left
 silentLabel.RichText = true
 silentLabel.Parent = screenGui
-
 local cameraLabel = Instance.new("TextLabel")
 cameraLabel.Name = "vacxx3"
 cameraLabel.Size = UDim2.new(0, 200, 0, 20)
@@ -117,7 +111,6 @@ cameraLabel.TextSize = 14
 cameraLabel.TextXAlignment = Enum.TextXAlignment.Left
 cameraLabel.RichText = true
 cameraLabel.Parent = screenGui
-
 local function updateDebugGUI()
     if shared._configUpdated then
         shared._configUpdated = false
@@ -140,7 +133,7 @@ local function updateDebugGUI()
             local name = silentAimTarget.DisplayName or silentAimTarget.Name
             silentLabel.Text = "silent: " .. name
         else
-            silentLabel.Text = "silent: none"
+            silentLabel.Text = "silent: nil"
         end
         silentLabel.TextColor3 = Color3.new(1, 1, 1)
     else
@@ -153,7 +146,7 @@ local function updateDebugGUI()
             local name = manualTarget.DisplayName or manualTarget.Name
             cameraLabel.Text = "camera: " .. name
         else
-            cameraLabel.Text = "camera: none"
+            cameraLabel.Text = "camera: nil"
         end
         cameraLabel.TextColor3 = Color3.new(1, 1, 1)
     else
@@ -411,46 +404,68 @@ local isMouseInTriggerBox = LPH_NO_VIRTUALIZE(function()
     return tNear <= tFar and tFar >= 0
 end)
 
-local getClosestPlayerToMouse = LPH_NO_VIRTUALIZE(function()
+local function getClosestPlayerToMouse()
+    local renderDist = shared.config['Silent Aim']['Render Distance']
     local closest = nil
     local bestDist = math.huge
-    
     local mx, my = getMousePosition()
     local mousePos = Vector2.new(mx, my)
+    local myChar = LocalPlayer.Character
+    local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
 
     for _, player in Players:GetPlayers() do
         if player ~= LocalPlayer and player.Character then
             local root = player.Character:FindFirstChild("HumanoidRootPart")
-            local bodyEffects = player.Character:FindFirstChild("BodyEffects")
-            local knocked = bodyEffects and bodyEffects:FindFirstChild("K.O") and bodyEffects["K.O"].Value
-
-            if root and not knocked then
-                local screenPos = Camera:WorldToViewportPoint(root.Position)
-                if screenPos.Z > 0 and isVisible(root) then
-                    local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                    if dist < bestDist then
-                        bestDist = dist
-                        closest = player
+            if root then
+                if (root.Position - myRoot.Position).Magnitude <= renderDist then
+                    local screenPos = Camera:WorldToViewportPoint(root.Position)
+                    if screenPos.Z > 0 and isVisible(root) then
+                        local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                        if dist < bestDist then
+                            bestDist = dist
+                            closest = player
+                        end
                     end
                 end
             end
         end
     end
-    
     return closest
-end)
+end
+
+local visibilityCache = setmetatable({}, {__mode = "v"})
+
+local function isTargetVisibleCached(targetChar)
+    if not targetChar then return false end
+    local head = targetChar:FindFirstChild("Head")
+    if not head then return false end
+
+    local key = targetChar
+    local cached = visibilityCache[key]
+    if cached and tick() - cached.time < 0.1 then
+        return cached.visible
+    end
+    
+    local visible = isTargetVisible(targetChar)
+    visibilityCache[key] = {visible = visible, time = tick()}
+    return visible
+end
 
 local GetClosestPointAdvanced = LPH_NO_VIRTUALIZE(function(Part, Scale)
     local cf = Part.CFrame
-    local size = Part.Size * (Scale / 2)
-
+    local size = Part.Size * (Scale * 0.5)
     local ray = Mouse.UnitRay
-    local rel = cf:PointToObjectSpace(ray.Origin + ray.Direction * ray.Direction:Dot(cf.Position - ray.Origin))
+    local ro, rd = ray.Origin, ray.Direction
+
+    local t = rd:Dot(cf.Position - ro)
+    local point = ro + rd * t
+    local rel = cf:PointToObjectSpace(point)
 
     return cf * Vector3.new(
-        math.clamp(rel.X, -size.X, size.X),
-        math.clamp(rel.Y, -size.Y, size.Y),
-        math.clamp(rel.Z, -size.Z, size.Z)
+        math.max(-size.X, math.min(rel.X, size.X)),
+        math.max(-size.Y, math.min(rel.Y, size.Y)),
+        math.max(-size.Z, math.min(rel.Z, size.Z))
     )
 end)
 
@@ -622,30 +637,40 @@ local function createCamBox(targetPlayer)
     camBox.Parent = targetPlayer.Character
 end
 
-local isMouseInBox = LPH_NO_VIRTUALIZE(function()
+local function isMouseInBox()
     if not (silentAimTarget and silentAimTarget.Character) then return false end
     local root = silentAimTarget.Character:FindFirstChild("HumanoidRootPart")
     if not root then return false end
 
     local boxSize = getCurrentWeaponFOV()
-    local half = Vector3.new(boxSize.X/2, boxSize.Y/2, boxSize.Z/2)
-    local bMin = root.Position - half
-    local bMax = root.Position + half
+    local half = boxSize * 0.5
+    local corners = {
+        root.Position + Vector3.new( half.X,  half.Y,  half.Z),
+        root.Position + Vector3.new( half.X,  half.Y, -half.Z),
+        root.Position + Vector3.new( half.X, -half.Y,  half.Z),
+        root.Position + Vector3.new( half.X, -half.Y, -half.Z),
+        root.Position + Vector3.new(-half.X,  half.Y,  half.Z),
+        root.Position + Vector3.new(-half.X,  half.Y, -half.Z),
+        root.Position + Vector3.new(-half.X, -half.Y,  half.Z),
+        root.Position + Vector3.new(-half.X, -half.Y, -half.Z),
+    }
 
-    local ray = Camera:ScreenPointToRay(Mouse.X, Mouse.Y)
-    local o, d = ray.Origin, ray.Direction
+    local minX, minY, maxX, maxY = math.huge, math.huge, -math.huge, -math.huge
+    for _, pos in ipairs(corners) do
+        local screenPos = Camera:WorldToViewportPoint(pos)
+        if screenPos.Z > 0 then
+            minX = math.min(minX, screenPos.X)
+            minY = math.min(minY, screenPos.Y)
+            maxX = math.max(maxX, screenPos.X)
+            maxY = math.max(maxY, screenPos.Y)
+        end
+    end
 
-    local tMin = (bMin - o) / d
-    local tMax = (bMax - o) / d
+    if minX == math.huge then return false end -- all corners behind camera
 
-    local t1 = Vector3.new(math.min(tMin.X,tMax.X), math.min(tMin.Y,tMax.Y), math.min(tMin.Z,tMax.Z))
-    local t2 = Vector3.new(math.max(tMin.X,tMax.X), math.max(tMin.Y,tMax.Y), math.max(tMin.Z,tMax.Z))
-
-    local tNear = math.max(t1.X, math.max(t1.Y, t1.Z))
-    local tFar  = math.min(t2.X, math.min(t2.Y, t2.Z))
-
-    return tNear <= tFar and tFar >= 0
-end)
+    local mousePos = UserInput:GetMouseLocation()
+    return mousePos.X >= minX and mousePos.X <= maxX and mousePos.Y >= minY and mousePos.Y <= maxY
+end
 
 UserInput.InputBegan:Connect(LPH_NO_VIRTUALIZE(function(inp, gp)
     if gp then return end
@@ -691,14 +716,14 @@ UserInput.InputEnded:Connect(LPH_NO_VIRTUALIZE(function(inp, gp)
 end))
 
 originalIndex = hookmetamethod(game, "__index", LPH_NO_VIRTUALIZE(function(self, key)
-    if self == Mouse and (key == "Hit" or key == "Target") and silentAimTarget then
-        if (not shared.config.Conditions["Whilst a player is selected"]["Visible"] or isTargetVisible(silentAimTarget.Character)) and isMouseInBox() then
-            local pos, part = resolveHit(silentAimTarget.Character)
-            if pos and part then
-                if key == "Hit" then
-                    return CFrame.new(pos)
-                else 
-                    return part
+    if self == Mouse and (key == "Hit" or key == "Target") then
+        local silent = shared.config['Silent Aim']
+        if silent.Enabled then
+            local target = silentAimTarget
+            if target and target.Character and isMouseInBox() then
+                local pos, part = resolveHit(target.Character)
+                if pos and part then
+                    return key == "Hit" and CFrame.new(pos) or part
                 end
             end
         end
@@ -774,7 +799,6 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
     local cameraAimbot = config['Camera Aimbot']
     local triggerBot = config['Trigger Bot']
 
-    -- Conditions for manualTarget (used by camera aimbot)
     if manualTarget then
         local selfChar = LocalPlayer.Character
         local targetChar = manualTarget.Character
@@ -837,36 +861,7 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
             if box then box:Destroy() box = nil end
         end
     end
-
-    if silentAim.Enabled and silentAim.Mode == 'Auto' then
-        local now = tick()
-        if now - lastAutoUpdate >= AUTO_UPDATE_INTERVAL then
-            lastAutoUpdate = now
-            local closest = getClosestPlayerToMouse()
-            if closest and closest.Character and canTargetPlayer(closest) then
-                if silentAimTarget ~= closest then
-                    silentAimTarget = closest
-                    if box then
-                        box.Adornee = closest.Character
-                    else
-                        createSilentBox(closest)
-                    end
-                end
-            else
-                if silentAimTarget then
-                    silentAimTarget = nil
-                    if box then box:Destroy() box = nil end
-                end
-            end
-        end
-        if silentAimTarget then
-            if not (silentAimTarget.Character and canTargetPlayer(silentAimTarget)) then
-                silentAimTarget = nil
-                if box then box:Destroy() box = nil end
-            end
-        end
-
-    elseif silentAim.Enabled and silentAim.Mode == 'Target' then
+    if silentAim.Enabled and silentAim.Mode == 'Target' then
         if manualTarget and manualTarget.Character and canTargetPlayer(manualTarget) then
             if silentAimTarget ~= manualTarget then
                 silentAimTarget = manualTarget
@@ -1002,8 +997,33 @@ RunService.RenderStepped:Connect(LPH_NO_VIRTUALIZE(function()
     end
     updateDebugGUI()
 end))
+
+task.spawn(function()
+    while task.wait(0.05) do
+        if shared.config['Silent Aim'].Enabled and shared.config['Silent Aim'].Mode == 'Auto' then
+            local closest = getClosestPlayerToMouse()
+            if closest and closest.Character and canTargetPlayer(closest) then
+                if silentAimTarget ~= closest then
+                    silentAimTarget = closest
+                    if box then
+                        box.Adornee = closest.Character
+                    else
+                        createSilentBox(closest)
+                    end
+                end
+            else
+                if silentAimTarget then
+                    silentAimTarget = nil
+                    if box then box:Destroy() box = nil end
+                end
+            end
+        end
+    end
+end)
+
 if shared.config['Console'] == true then
-    print("> Loaded ✅") 
+    print("UG → [<✅>] - Loaded")
+    return
     else
-    return 
+    return
 end
