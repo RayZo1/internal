@@ -3,9 +3,9 @@ local StarterGui = game:GetService("StarterGui")
 local Players = game:GetService("Players")
 local initialized = false
 local sessionid = ""
-Name = "a" --* Application Name
-Ownerid = "yEJi1g7NyN" --* OwnerID
-APPVersion = "1.0"     --* Application Version
+Name = "a"
+Ownerid = "yEJi1g7NyN"
+APPVersion = "1.0"
 local req = game:HttpGet('https://keyauth.win/api/1.1/?name=' .. Name .. '&ownerid=' .. Ownerid .. '&type=init&ver=' .. APPVersion)
 if req == "KeyAuth_Invalid" then 
    local player = Players.LocalPlayer
@@ -44,15 +44,14 @@ if data.success == false then
     return false
 end
 
-local v = "V1"
+local v = "V1.1"
 
 if _G.Loaded == true then 
     if shared.config['Console'] == true then
         print("> Updated config ✅") 
-        return
-    else
-        return
     end
+    shared._configUpdated = true
+    return
 end
 if shared.config['Console'] == true then
     print("> Key Accepted ✅") 
@@ -83,8 +82,7 @@ local cachedWeaponFOV = Vector3.new(5, 6.5, 3)
 local cachedCamFOV   = Vector3.new(10, 10, 10)
 local lastAutoUpdate = 0
 local AUTO_UPDATE_INTERVAL = 0.1
-local debugGuiEnabled = shared.config.Info and shared.config.Info.Enabled or true
-local debugGuiPosition = shared.config.Info and shared.config.Info.Position or {X=200, Y=50}
+
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "bwq2"
@@ -95,7 +93,7 @@ screenGui.Parent = game:GetService("CoreGui")
 local silentLabel = Instance.new("TextLabel")
 silentLabel.Name = "zxcxwa2"
 silentLabel.Size = UDim2.new(0, 200, 0, 20)
-silentLabel.Position = UDim2.new(0, debugGuiPosition.X, 0, debugGuiPosition.Y)
+silentLabel.Position = UDim2.new(0, shared.config.Info.Position.X, 0, shared.config.Info.Position.Y)
 silentLabel.BackgroundTransparency = 1
 silentLabel.Text = "silent: false"
 silentLabel.TextColor3 = Color3.new(1, 1, 1)
@@ -109,7 +107,7 @@ silentLabel.Parent = screenGui
 local cameraLabel = Instance.new("TextLabel")
 cameraLabel.Name = "vacxx3"
 cameraLabel.Size = UDim2.new(0, 200, 0, 20)
-cameraLabel.Position = UDim2.new(0, debugGuiPosition.X, 0, debugGuiPosition.Y + 20)
+cameraLabel.Position = UDim2.new(0, shared.config.Info.Position.X, 0, shared.config.Info.Position.Y + 20)
 cameraLabel.BackgroundTransparency = 1
 cameraLabel.Text = "camera: false"
 cameraLabel.TextColor3 = Color3.new(1, 1, 1)
@@ -119,16 +117,24 @@ cameraLabel.TextSize = 14
 cameraLabel.TextXAlignment = Enum.TextXAlignment.Left
 cameraLabel.RichText = true
 cameraLabel.Parent = screenGui
+
 local function updateDebugGUI()
-    if not debugGuiEnabled then 
-        screenGui.Enabled = false
-        return 
-    else
-        screenGui.Enabled = true
+    if shared._configUpdated then
+        shared._configUpdated = false
     end
-    
+
+    local info = shared.config.Info or {}
+    local enabled = info.Enabled ~= false
+    screenGui.Enabled = enabled
+    if not enabled then return end
+
+    local pos = info.Position or {X=200, Y=100}
+    silentLabel.Position = UDim2.new(0, pos.X, 0, pos.Y)
+    cameraLabel.Position = UDim2.new(0, pos.X, 0, pos.Y + 20)
+
     local silentAim = shared.config['Silent Aim']
     local cameraAimbot = shared.config['Camera Aimbot']
+
     if silentAim.Enabled then
         if silentAimTarget and silentAimTarget.Character then
             local name = silentAimTarget.DisplayName or silentAimTarget.Name
@@ -141,6 +147,7 @@ local function updateDebugGUI()
         silentLabel.Text = "silent: <color=#FF0000>OFF</color>"
         silentLabel.TextColor3 = Color3.new(1, 1, 1)
     end
+
     if cameraAimbot.Enabled then
         if manualTarget and manualTarget.Character then
             local name = manualTarget.DisplayName or manualTarget.Name
