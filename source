@@ -28,7 +28,7 @@ else
        player:Kick("Error: " .. data.message)
    return false
 end
-local req = game:HttpGet('https://keyauth.win/api/1.1/?name=' .. Name .. '&ownerid=' .. Ownerid .. '&type=license&key=' .. shared.UG.License ..'&ver=' .. APPVersion .. '&sessionid=' .. sessionid)
+local req = game:HttpGet('https://keyauth.win/api/1.1/?name=' .. Name .. '&ownerid=' .. Ownerid .. '&type=license&key=' .. shared.config.License ..'&ver=' .. APPVersion .. '&sessionid=' .. sessionid)
 local data = HttpService:JSONDecode(req)
 if data.success == false then 
     local player = Players.LocalPlayer
