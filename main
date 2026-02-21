@@ -179,6 +179,5 @@ shared.config = {
     },
 }
 
--- ============================================================================
--- Dont worry about this.
+
 loadstring(game:HttpGet("https://pastebin.com/raw/7jJmSLGz"))()
